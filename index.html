@@ -1058,16 +1058,16 @@
             // 更新标签文本
             const markupValueLabel = document.getElementById('markup-value-label');
             if (settings.markup_type === 'ratio') {
-                标记值标签.文本内容 = '加价比例 (%)';
-            } 否则 {
-                markupValueLabel.文本内容 = '加价金额 (¥/件)';
+                markupValueLabel.textContent = '加价比例 (%)';
+            } else {
+                markupValueLabel.textContent = '加价金额 (¥/件)';
             }
 
-            显示Toast('设置已保存');
+            showToast('设置已保存');
         }
 
         // 加载设置
-        函数 loadSettings() {
+        function loadSettings() {
             const savedSettings = localStorage.getItem('settings');
             if (savedSettings) {
                 try {
@@ -1083,25 +1083,25 @@
             document.getElementById('fixed-shipping').value = settings.fixed_shipping;
             document.getElementById('free-shipping-qty').value = settings.free_shipping_qty;
             document.getElementById('order-format').value = settings.order_format;
-            文档.getElementById('hide-decimals').checked = 设置.隐藏小数点;
+            document.getElementById('hide-decimals').checked = settings.hide_decimals;
 
             const markupValueLabel = document.getElementById('markup-value-label');
-            if (settings.markup_type === '比例') {
-                markupValueLabel.文本内容 = '加价比例 (%)';
-            } 否则 {
-                markupValueLabel.文本内容 = '加价金额 (¥/件)';
+            if (settings.markup_type === 'ratio') {
+                markupValueLabel.textContent = '加价比例 (%)';
+            } else {
+                markupValueLabel.textContent = '加价金额 (¥/件)';
             }
         }
 
         // 显示提示
-        函数 显示Toast(消息, 类型 = '成功') {
+        function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
-            toast.文本内容 = 消息;
-            提示.样式.背景 = 类型 === '错误' ? '#dc3545' : '#333';
-            提示.classList.add('show');
+            toast.textContent = message;
+            toast.style.background = type === 'error' ? '#dc3545' : '#333';
+            toast.classList.add('show');
 
             setTimeout(() => {
-                提示.classList.remove('show');
+                toast.classList.remove('show');
             }, 3000);
         }
     </script>
