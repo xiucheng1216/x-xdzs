@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品价格计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: #495057;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .product-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .product-item {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .product-item:hover {
+            background: #f8f9fa;
+        }
+
+        .product-item.selected {
+            background: #e7f1ff;
+        }
+
+        .product-info {
+            flex: 1;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: #212529;
+        }
+
+        .product-price {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .cart-item {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-info {
+            flex: 1;
+        }
+
+        .cart-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 18px;
+            color: #667eea;
+        }
+
+        .order-text {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .file-upload {
+            border: 2px dashed #667eea;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload:hover {
+            background: #f8f9fa;
+            border-color: #764ba2;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+                margin: -20px;
+            }
+
+            .tab {
+                padding: 12px 8px;
+                font-size: 14px;
+            }
+
+            .product-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .cart-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .cart-controls {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 10px;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 1001;
+            display: none;
+        }
+
+        .toast.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 商品价格计算器</h1>
+            <p>iPhone版 - 随时随地计算商品价格</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="product">商品计算</button>
+            <button class="tab" data-tab="order">下单信息</button>
+            <button class="tab" data-tab="settings">设置</button>
+        </div>
+
+        <div id="product-tab" class="tab-content active">
+            <div class="input-group">
+                <label>搜索商品</label>
+                <input type="text" id="search-input" placeholder="输入商品名称搜索...">
+            </div>
+
+            <div class="file-upload" onclick="document.getElementById('csv-file').click()">
+                <p>📁 点击导入CSV文件</p>
+                <p style="font-size: 12px; color: #999; margin-top: 5px;">支持格式：序号,名称,进价</p>
+                <input type="file" id="csv-file" accept=".csv" style="display: none;" onchange="handleFileUpload(event)">
+            </div>
+
+            <div style="margin: 15px 0;">
+                <button class="btn btn-primary" onclick="saveData()">💾 保存数据</button>
+                <button class="btn btn-danger" onclick="clearData()">🗑️ 清空数据</button>
+            </div>
+
+            <p id="data-count" style="color: #999; margin-bottom: 10px;">当前数据: 0 条</p>
+
+            <div class="product-list" id="product-list">
+                <p style="text-align: center; color: #999; padding: 20px;">暂无商品数据，请导入CSV文件</p>
+            </div>
+
+            <div class="input-group">
+                <label>数量</label>
+                <input type="number" id="quantity" value="1" min="1" max="999">
+            </div>
+
+            <button class="btn btn-success" onclick="addToCart()" style="width: 100%;">➕ 添加到计算列表</button>
+
+            <hr style="margin: 20px 0;">
+
+            <h3>🛒 计算列表</h3>
+            <div class="product-list" id="cart-list">
+                <p style="text-align: center; color: #999; padding: 20px;">购物车为空</p>
+            </div>
+
+            <button class="btn btn-primary" onclick="calculateTotal()" style="width: 100%;">💰 计算总价</button>
+
+            <div class="result-box" id="result-box" style="display: none;">
+                <div class="result-item">
+                    <span>商品小计</span>
+                    <span id="subtotal">¥0.00</span>
+                </div>
+                <div class="result-item" id="markup-row" style="display: none;">
+                    <span>加价金额</span>
+                    <span id="markup">¥0.00</span>
+                </div>
+                <div class="result-item" id="shipping-row" style="display: none;">
+                    <span>运费</span>
+                    <span id="shipping">¥0.00</span>
+                </div>
+                <div class="result-item">
+                    <span>合计金额</span>
+                    <span id="total">¥0.00</span>
+                </div>
+                <div class="result-item" id="tax-row" style="display: none;">
+                    <span>税额</span>
+                    <span id="tax">¥0.00</span>
+                </div>
+                <div class="result-item" id="tax-total-row" style="display: none;">
+                    <span>含税总计</span>
+                    <span id="tax-total">¥0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="order-tab" class="tab-content">
+            <h3>📋 下单信息</h3>
+
+            <div class="input-group">
+                <label>姓名</label>
+                <input type="text" id="customer-name" placeholder="请输入姓名">
+            </div>
+
+            <div class="input-group">
+                <label>手机号</label>
+                <input type="tel" id="customer-phone" placeholder="请输入手机号">
+            </div>
+
+            <div class="input-group">
+                <label>地址</label>
+                <input type="text" id="customer-address" placeholder="请输入地址">
+            </div>
+
+            <div style="margin: 15px 0;">
+                <button class="btn btn-primary" onclick="generateOrderInfo()">📝 生成下单信息</button>
+                <button class="btn btn-warning" onclick="pasteAndParse()">📋 粘贴识别</button>
+            </div>
+
+            <div class="input-group">
+                <label>下单信息</label>
+                <textarea class="order-text" id="order-text" readonly placeholder="点击生成下单信息按钮..."></textarea>
+            </div>
+
+            <button class="btn btn-success" onclick="copyOrderInfo()" style="width: 100%;">📋 复制下单信息</button>
+        </div>
+
+        <div id="settings-tab" class="tab-content">
+            <h3>⚙️ 设置</h3>
+
+            <div class="input-group">
+                <label>加价方式</label>
+                <select id="markup-type" onchange="saveSettings()">
+                    <option value="ratio">按比例加价</option>
+                    <option value="fixed">按件数加价</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label id="markup-value-label">加价比例 (%)</label>
+                <input type="number" id="markup-value" value="0" min="0" step="0.1" onchange="saveSettings()">
+            </div>
+
+            <div class="input-group">
+                <label>税率 (%)</label>
+                <input type="number" id="tax-rate" value="0" min="0" max="100" step="0.1" onchange="saveSettings()">
+            </div>
+
+            <div class="input-group">
+                <label>固定运费 (¥)</label>
+                <input type="number" id="fixed-shipping" value="0" min="0" step="0.01" onchange="saveSettings()">
+            </div>
+
+            <div class="input-group">
+                <label>免运费数量 (件)</label>
+                <input type="number" id="free-shipping-qty" value="0" min="0" onchange="saveSettings()">
+            </div>
+
+            <div class="input-group">
+                <label>下单信息格式</label>
+                <textarea class="order-text" id="order-format" onchange="saveSettings()">{name}{phone}
+ {address}
+ 序号:{seq}
+ 共{quantity}包
+ {price_calc}</textarea>
+            </div>
+
+            <div class="input-group">
+                <label>
+                    <input type="checkbox" id="hide-decimals" onchange="saveSettings()"> 隐藏小数
+                </label>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveSettings()" style="width: 100%;">💾 保存设置</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 全局状态
+        let productData = {};
+        let cart = {};
+        let settings = {
+            markup_type: 'ratio',
+            markup_value: 0,
+            tax_rate: 0,
+            fixed_shipping: 0,
+            free_shipping_qty: 0,
+            order_format: '{name}{phone}\n {address}\n 序号:{seq}\n 共{quantity}包\n {price_calc}',
+            hide_decimals: false
+        };
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            loadProductData();
+            setupTabs();
+            setupSearch();
+        });
+
+        // 标签页切换
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const tabId = this.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(tabId + '-tab').classList.add('active');
+                });
+            });
+        }
+
+        // 搜索功能
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', function() {
+                filterProducts(this.value);
+            });
+        }
+
+        // 文件上传处理
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    parseCSVContent(text);
+                } catch (error) {
+                    // 如果UTF-8失败，尝试GBK编码
+                    tryGBKEncoding(file);
+                }
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // 尝试GBK编码
+        function tryGBKEncoding(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    parseCSVContent(text);
+                } catch (error) {
+                    showToast('文件编码不支持，请使用UTF-8或GBK编码的CSV文件', 'error');
+                }
+            };
+            reader.readAsText(file, 'GBK');
+        }
+
+        // 解析CSV内容
+        function parseCSVContent(text) {
+            const lines = text.split('\n');
+            const newData = {};
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const parts = line.split(',');
+                if (parts.length >= 3) {
+                    const seq = parts[0].trim();
+                    const name = parts[1].trim();
+                    const price = parseFloat(parts[2].trim());
+
+                    if (!isNaN(price)) {
+                        newData[name] = { seq, price };
+                    }
+                }
+            }
+
+            if (Object.keys(newData).length > 0) {
+                productData = { ...productData, ...newData };
+                updateProductList();
+                updateDataCount();
+                showToast(`成功导入 ${Object.keys(newData).length} 条商品数据`);
+            } else {
+                showToast('未找到有效数据', 'error');
+            }
+        }
+
+        // 更新商品列表
+        function updateProductList(filter = '') {
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '';
+
+            const filteredProducts = Object.entries(productData).filter(([name]) => {
+                return !filter || name.toLowerCase().includes(filter.toLowerCase());
+            });
+
+            if (filteredProducts.length === 0) {
+                productList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">暂无商品数据</p>';
+                return;
+            }
+
+            filteredProducts.forEach(([name, data]) => {
+                const item = document.createElement('div');
+                item.className = 'product-item';
+                item.innerHTML = `
+                    <div class="product-info">
+                        <div class="product-name">${name}</div>
+                        <div class="product-price">¥${data.price.toFixed(2)}</div>
+                    </div>
+                    <div style="color: #999; font-size: 12px;">序号: ${data.seq}</div>
+                `;
+                item.onclick = function() {
+                    this.classList.toggle('selected');
+                };
+                productList.appendChild(item);
+            });
+        }
+
+        // 过滤商品
+        function filterProducts(keyword) {
+            updateProductList(keyword);
+        }
+
+        // 添加到购物车
+        function addToCart() {
+            const selectedProducts = document.querySelectorAll('.product-item.selected');
+            if (selectedProducts.length === 0) {
+                showToast('请先选择商品', 'error');
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+
+            selectedProducts.forEach(item => {
+                const name = item.querySelector('.product-name').textContent;
+                const price = parseFloat(item.querySelector('.product-price').textContent.replace('¥', ''));
+
+                if (cart[name]) {
+                    cart[name].quantity += quantity;
+                } else {
+                    cart[name] = { price, quantity };
+                }
+            });
+
+            updateCartList();
+            showToast(`已添加 ${selectedProducts.length} 种商品到购物车`);
+
+            // 清除选择状态
+            selectedProducts.forEach(item => item.classList.remove('selected'));
+        }
+
+        // 更新购物车列表
+        function updateCartList() {
+            const cartList = document.getElementById('cart-list');
+            cartList.innerHTML = '';
+
+            if (Object.keys(cart).length === 0) {
+                cartList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">购物车为空</p>';
+                return;
+            }
+
+            Object.entries(cart).forEach(([name, data]) => {
+                const item = document.createElement('div');
+                item.className = 'cart-item';
+                item.innerHTML = `
+                    <div class="cart-info">
+                        <div class="product-name">${name}</div>
+                        <div class="product-price">¥${data.price.toFixed(2)} × ${data.quantity} = ¥${(data.price * data.quantity).toFixed(2)}</div>
+                    </div>
+                    <div class="cart-controls">
+                        <button class="quantity-btn" onclick="updateQuantity('${name}', -1)">-</button>
+                        <span>${data.quantity}</span>
+                        <button class="quantity-btn" onclick="updateQuantity('${name}', 1)">+</button>
+                        <button class="btn btn-danger" onclick="removeFromCart('${name}')" style="padding: 5px 10px; margin: 0;">删除</button>
+                    </div>
+                `;
+                cartList.appendChild(item);
+            });
+        }
+
+        // 更新数量
+        function updateQuantity(name, delta) {
+            if (cart[name]) {
+                cart[name].quantity += delta;
+                if (cart[name].quantity <= 0) {
+                    delete cart[name];
+                }
+                updateCartList();
+            }
+        }
+
+        // 从购物车删除
+        function removeFromCart(name) {
+            delete cart[name];
+            updateCartList();
+        }
+
+        // 计算总价
+        function calculateTotal() {
+            if (Object.keys(cart).length === 0) {
+                showToast('请先添加商品到购物车', 'error');
+                return;
+            }
+
+            const calcData = calculateOrderData();
+
+            document.getElementById('subtotal').textContent = `¥${calcData.subtotal.toFixed(2)}`;
+
+            const markupRow = document.getElementById('markup-row');
+            if (calcData.markup_amount > 0) {
+                markupRow.style.display = 'flex';
+                document.getElementById('markup').textContent = `¥${calcData.markup_amount.toFixed(2)} ${calcData.markup_desc}`;
+            } else {
+                markupRow.style.display = 'none';
+            }
+
+            const shippingRow = document.getElementById('shipping-row');
+            if (calcData.customer_shipping > 0) {
+                shippingRow.style.display = 'flex';
+                document.getElementById('shipping').textContent = `¥${calcData.customer_shipping.toFixed(2)}`;
+            } else {
+                shippingRow.style.display = 'none';
+            }
+
+            document.getElementById('total').textContent = `¥${calcData.total_amount.toFixed(2)}`;
+
+            const taxRow = document.getElementById('tax-row');
+            const taxTotalRow = document.getElementById('tax-total-row');
+            if (settings.tax_rate > 0) {
+                taxRow.style.display = 'flex';
+                taxTotalRow.style.display = 'flex';
+                document.getElementById('tax').textContent = `¥${calcData.tax_amount.toFixed(2)}`;
+                document.getElementById('tax-total').textContent = `¥${calcData.tax_total.toFixed(2)}`;
+            } else {
+                taxRow.style.display = 'none';
+                taxTotalRow.style.display = 'none';
+            }
+
+            document.getElementById('result-box').style.display = 'block';
+        }
+
+        // 计算订单数据
+        function calculateOrderData() {
+            let subtotal = 0;
+            let item_count = 0;
+
+            Object.entries(cart).forEach(([name, data]) => {
+                subtotal += data.price * data.quantity;
+                item_count += data.quantity;
+            });
+
+            let markup_amount, markup_desc;
+            if (settings.markup_type === 'ratio') {
+                markup_amount = subtotal * (settings.markup_value / 100);
+                markup_desc = `(${settings.markup_value}%)`;
+            } else {
+                markup_amount = settings.markup_value * item_count;
+                markup_desc = `(¥${settings.markup_value}/件)`;
+            }
+
+            const is_free_shipping = item_count >= settings.free_shipping_qty;
+            const customer_shipping = is_free_shipping ? 0 : settings.fixed_shipping;
+            const actual_shipping = settings.fixed_shipping;
+
+            const total_amount = subtotal + markup_amount + customer_shipping;
+            const tax_base = subtotal + actual_shipping;
+            const tax_amount = tax_base * (settings.tax_rate / 100);
+            const tax_total = subtotal + actual_shipping + tax_amount;
+
+            return {
+                subtotal,
+                item_count,
+                markup_amount,
+                markup_desc,
+                customer_shipping,
+                actual_shipping,
+                total_amount,
+                tax_amount,
+                tax_total,
+                is_free_shipping
+            };
+        }
+
+        // 生成下单信息
+        function generateOrderInfo() {
+            if (Object.keys(cart).length === 0) {
+                showToast('请先添加商品到购物车', 'error');
+                return;
+            }
+
+            const name = document.getElementById('customer-name').value.trim() || '未知';
+            const phone = document.getElementById('customer-phone').value.trim() || '未知';
+            const address = document.getElementById('customer-address').value.trim() || '未知';
+
+            const calcData = calculateOrderData();
+
+            let seq_list = [];
+            let calc_items = [];
+            let product_subtotal = 0;
+            let total_quantity = 0;
+
+            Object.entries(cart).forEach(([name_item, data]) => {
+                const seq = productData[name_item].seq;
+                seq_list.push(seq);
+                const price = data.price;
+                const quantity = data.quantity;
+                const subtotal = price * quantity;
+                product_subtotal += subtotal;
+                total_quantity += quantity;
+
+                if (quantity === 1) {
+                    calc_items.push(formatPrice(price));
+                } else {
+                    calc_items.push(`${formatPrice(price)}*${quantity}`);
+                }
+            });
+
+            let markup_amount = 0;
+            if (settings.markup_value > 0) {
+                if (settings.markup_type === 'ratio') {
+                    markup_amount = product_subtotal * (settings.markup_value / 100);
+                } else {
+                    markup_amount = settings.markup_value * total_quantity;
+                }
+            }
+
+            const shipping_amount = settings.fixed_shipping > 0 ? settings.fixed_shipping : 0;
+            const total_amount = product_subtotal + markup_amount + shipping_amount;
+
+            const tax_rate = settings.tax_rate > 0 ? settings.tax_rate / 100 : 0;
+            const tax_amount = (product_subtotal + shipping_amount) * tax_rate;
+            const tax_total = product_subtotal + shipping_amount + tax_amount;
+
+            const tax_rate_display = (1 + tax_rate).toFixed(2);
+            let calc_items_with_shipping = [...calc_items];
+            if (shipping_amount > 0) {
+                calc_items_with_shipping.push(formatPrice(shipping_amount));
+            }
+            const price_calc = `${calc_items_with_shipping.join('+')}=${formatPrice(product_subtotal + shipping_amount)}×${tax_rate_display}=${formatPrice(tax_total)}`;
+
+            let order_info = settings.order_format
+                .replace('{name}', name)
+                .replace('{phone}', phone)
+                .replace('{address}', address)
+                .replace('{seq}', seq_list.join(' '))
+                .replace('{quantity}', total_quantity)
+                .replace('{subtotal}', formatPrice(product_subtotal))
+                .replace('{markup}', formatPrice(markup_amount))
+                .replace('{shipping}', formatPrice(shipping_amount))
+                .replace('{total}', formatPrice(total_amount))
+                .replace('{tax}', formatPrice(tax_amount))
+                .replace('{tax_total}', formatPrice(tax_total))
+                .replace('{price_calc}', price_calc);
+
+            document.getElementById('order-text').value = order_info;
+        }
+
+        // 格式化价格
+        function formatPrice(price) {
+            if (settings.hide_decimals) {
+                return `¥${Math.round(price)}`;
+            }
+            return `¥${price.toFixed(2)}`;
+        }
+
+        // 复制下单信息
+        function copyOrderInfo() {
+            const orderText = document.getElementById('order-text');
+            if (!orderText.value) {
+                showToast('没有可复制的下单信息', 'error');
+                return;
+            }
+
+            orderText.select();
+            document.execCommand('copy');
+            showToast('下单信息已复制到剪贴板');
+        }
+
+        // 粘贴识别
+        async function pasteAndParse() {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (!text) {
+                    showToast('剪贴板为空', 'error');
+                    return;
+                }
+
+                // 解析姓名
+                const nameMatch = text.match(/姓名[：:]\s*([^\n电话]+)/);
+                if (nameMatch) {
+                    document.getElementById('customer-name').value = nameMatch[1].trim();
+                }
+
+                // 解析手机号
+                const phoneMatch = text.match(/电话[：:]\s*(\d{11})/);
+                if (phoneMatch) {
+                    document.getElementById('customer-phone').value = phoneMatch[1];
+                }
+
+                // 解析地址
+                const addressMatch = text.match(/地址[：:]\s*([^\n\]]+)/);
+                if (addressMatch) {
+                    document.getElementById('customer-address').value = addressMatch[1].trim();
+                }
+
+                showToast('已识别并填充客户信息');
+            } catch (error) {
+                showToast('无法访问剪贴板，请手动输入', 'error');
+            }
+        }
+
+        // 保存数据
+        function saveData() {
+            if (Object.keys(productData).length === 0) {
+                showToast('没有数据可保存', 'error');
+                return;
+            }
+
+            localStorage.setItem('productData', JSON.stringify(productData));
+            showToast('数据已保存');
+        }
+
+        // 加载数据
+        function loadProductData() {
+            const savedData = localStorage.getItem('productData');
+            if (savedData) {
+                try {
+                    productData = JSON.parse(savedData);
+                    updateProductList();
+                    updateDataCount();
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                }
+            }
+        }
+
+        // 清空数据
+        function clearData() {
+            if (Object.keys(productData).length === 0) {
+                showToast('没有数据可清空', 'error');
+                return;
+            }
+
+            if (confirm('确定要清空所有商品数据吗？此操作不可撤销！')) {
+                productData = {};
+                cart = {};
+                updateProductList();
+                updateCartList();
+                updateDataCount();
+                localStorage.removeItem('productData');
+                showToast('数据已清空');
+            }
+        }
+
+        // 更新数据计数
+        function updateDataCount() {
+            document.getElementById('data-count').textContent = `当前数据: ${Object.keys(productData).length} 条`;
+        }
+
+        // 保存设置
+        function saveSettings() {
+            settings.markup_type = document.getElementById('markup-type').value;
+            settings.markup_value = parseFloat(document.getElementById('markup-value').value) || 0;
+            settings.tax_rate = parseFloat(document.getElementById('tax-rate').value) || 0;
+            settings.fixed_shipping = parseFloat(document.getElementById('fixed-shipping').value) || 0;
+            settings.free_shipping_qty = parseInt(document.getElementById('free-shipping-qty').value) || 0;
+            settings.order_format = document.getElementById('order-format').value;
+            settings.hide_decimals = document.getElementById('hide-decimals').checked;
+
+            localStorage.setItem('settings', JSON.stringify(settings));
+
+            // 更新标签文本
+            const markupValueLabel = document.getElementById('markup-value-label');
+            if (settings.markup_type === 'ratio') {
+                markupValueLabel.textContent = '加价比例 (%)';
+            } else {
+                markupValueLabel.textContent = '加价金额 (¥/件)';
+            }
+
+            showToast('设置已保存');
+        }
+
+        // 加载设置
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('settings');
+            if (savedSettings) {
+                try {
+                    settings = { ...settings, ...JSON.parse(savedSettings) };
+                } catch (error) {
+                    console.error('加载设置失败:', error);
+                }
+            }
+
+            document.getElementById('markup-type').value = settings.markup_type;
+            document.getElementById('markup-value').value = settings.markup_value;
+            document.getElementById('tax-rate').value = settings.tax_rate;
+            document.getElementById('fixed-shipping').value = settings.fixed_shipping;
+            document.getElementById('free-shipping-qty').value = settings.free_shipping_qty;
+            document.getElementById('order-format').value = settings.order_format;
+            document.getElementById('hide-decimals').checked = settings.hide_decimals;
+
+            const markupValueLabel = document.getElementById('markup-value-label');
+            if (settings.markup_type === 'ratio') {
+                markupValueLabel.textContent = '加价比例 (%)';
+            } else {
+                markupValueLabel.textContent = '加价金额 (¥/件)';
+            }
+        }
+
+        // 显示提示
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = type === 'error' ? '#dc3545' : '#333';
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
