@@ -569,29 +569,75 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                try {
-                    const text = e.target.result;
-                    parseCSVContent(text);
-                } catch (error) {
-                    // 如果UTF-8失败，尝试GBK编码
-                    tryGBKEncoding(file);
-                }
+                const arrayBuffer = e.target.result;
+                // 尝试多种编码解码
+                tryDecodeWithMultipleEncodings(arrayBuffer);
             };
-            reader.readAsText(file, 'UTF-8');
+            reader.readAsArrayBuffer(file);
         }
 
-        // 尝试GBK编码
-        function tryGBKEncoding(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
+        // 尝试多种编码解码
+        function tryDecodeWithMultipleEncodings(arrayBuffer) {
+            const encodings = ['UTF-8', 'GBK', 'GB2312', 'GB18030', 'BIG5'];
+            
+            for (let i = 0; i < encodings.length; i++) {
                 try {
-                    const text = e.target.result;
-                    parseCSVContent(text);
+                    const text = decodeText(arrayBuffer, encodings[i]);
+                    // 检查是否是有效的文本（包含中文或正常字符）
+                    if (isValidText(text)) {
+                        parseCSVContent(text);
+                        return;
+                    }
                 } catch (error) {
-                    showToast('文件编码不支持，请使用UTF-8或GBK编码的CSV文件', 'error');
+                    continue;
                 }
-            };
-            reader.readAsText(file, 'GBK');
+            }
+            
+            // 如果都失败，尝试移除BOM后再试
+            try {
+                const bufferWithoutBOM = removeBOM(arrayBuffer);
+                for (let i = 0; i < encodings.length; i++) {
+                    try {
+                        const text = decodeText(bufferWithoutBOM, encodings[i]);
+                        if (isValidText(text)) {
+                            parseCSVContent(text);
+                            return;
+                        }
+                    } catch (error) {
+                        continue;
+                    }
+                }
+            } catch (error) {
+                // 忽略
+            }
+            
+            showToast('无法识别文件编码，请使用UTF-8或GBK编码保存CSV文件', 'error');
+        }
+
+        // 解码文本
+        function decodeText(arrayBuffer, encoding) {
+            const decoder = new TextDecoder(encoding, { fatal: true });
+            return decoder.decode(arrayBuffer);
+        }
+
+        // 移除BOM标记
+        function removeBOM(arrayBuffer) {
+            const view = new Uint8Array(arrayBuffer);
+            if (view.length >= 3 && view[0] === 0xEF && view[1] === 0xBB && view[2] === 0xBF) {
+                return arrayBuffer.slice(3);
+            }
+            return arrayBuffer;
+        }
+
+        // 检查文本是否有效（包含中文或数字）
+        function isValidText(text) {
+            if (!text || text.trim() === '') return false;
+            // 检查是否包含乱码字符（连续多个替换字符）
+            const garbagePattern = /\ufffd{2,}/; // 连续的替换字符
+            if (garbagePattern.test(text)) return false;
+            // 检查是否包含有效字符（中文、数字、字母）
+            const validPattern = /[\u4e00-\u9fa5\u3000-\u303f\uff00-\uffef0-9a-zA-Z]/;
+            return validPattern.test(text);
         }
 
         // 解析CSV内容
@@ -609,7 +655,7 @@
                     const name = parts[1].trim();
                     const price = parseFloat(parts[2].trim());
 
-                    if (!isNaN(price)) {
+                    if (!isNaN(price) && name && name.length > 0) {
                         newData[name] = { seq, price };
                     }
                 }
@@ -621,7 +667,7 @@
                 updateDataCount();
                 showToast(`成功导入 ${Object.keys(newData).length} 条商品数据`);
             } else {
-                showToast('未找到有效数据', 'error');
+                showToast('未找到有效数据，请检查CSV格式', 'error');
             }
         }
 
@@ -1012,16 +1058,16 @@
             // 更新标签文本
             const markupValueLabel = document.getElementById('markup-value-label');
             if (settings.markup_type === 'ratio') {
-                markupValueLabel.textContent = '加价比例 (%)';
-            } else {
-                markupValueLabel.textContent = '加价金额 (¥/件)';
+                标记值标签.文本内容 = '加价比例 (%)';
+            } 否则 {
+                markupValueLabel.文本内容 = '加价金额 (¥/件)';
             }
 
-            showToast('设置已保存');
+            显示Toast('设置已保存');
         }
 
         // 加载设置
-        function loadSettings() {
+        函数 loadSettings() {
             const savedSettings = localStorage.getItem('settings');
             if (savedSettings) {
                 try {
@@ -1037,25 +1083,25 @@
             document.getElementById('fixed-shipping').value = settings.fixed_shipping;
             document.getElementById('free-shipping-qty').value = settings.free_shipping_qty;
             document.getElementById('order-format').value = settings.order_format;
-            document.getElementById('hide-decimals').checked = settings.hide_decimals;
+            文档.getElementById('hide-decimals').checked = 设置.隐藏小数点;
 
             const markupValueLabel = document.getElementById('markup-value-label');
-            if (settings.markup_type === 'ratio') {
-                markupValueLabel.textContent = '加价比例 (%)';
-            } else {
-                markupValueLabel.textContent = '加价金额 (¥/件)';
+            if (settings.markup_type === '比例') {
+                markupValueLabel.文本内容 = '加价比例 (%)';
+            } 否则 {
+                markupValueLabel.文本内容 = '加价金额 (¥/件)';
             }
         }
 
         // 显示提示
-        function showToast(message, type = 'success') {
+        函数 显示Toast(消息, 类型 = '成功') {
             const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.style.background = type === 'error' ? '#dc3545' : '#333';
-            toast.classList.add('show');
+            toast.文本内容 = 消息;
+            提示.样式.背景 = 类型 === '错误' ? '#dc3545' : '#333';
+            提示.classList.add('show');
 
             setTimeout(() => {
-                toast.classList.remove('show');
+                提示.classList.remove('show');
             }, 3000);
         }
     </script>
