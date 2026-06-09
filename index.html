@@ -531,11 +531,70 @@
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
-            loadSettings();
-            loadProductData();
-            setupTabs();
-            setupSearch();
+            loadDefaultData().then(() => {
+                loadSettings();
+                loadProductData();
+                setupTabs();
+                setupSearch();
+            });
         });
+
+        // 加载默认数据（首次访问时）
+        async function loadDefaultData() {
+            // 检查是否是首次访问
+            const hasVisited = localStorage.getItem('hasVisited');
+            if (hasVisited) {
+                return; // 已经访问过，跳过默认数据加载
+            }
+
+            try {
+                // 优先加载CSV文件作为默认商品数据
+                const csvResponse = await fetch('a.csv');
+                if (csvResponse.ok) {
+                    const csvText = await csvResponse.text();
+                    const defaultProducts = parseCSVForDefault(csvText);
+                    if (Object.keys(defaultProducts).length > 0) {
+                        localStorage.setItem('productData', JSON.stringify(defaultProducts));
+                    }
+                }
+
+                // 加载默认设置
+                const settingsResponse = await fetch('app_settings.json');
+                if (settingsResponse.ok) {
+                    const defaultSettings = await settingsResponse.json();
+                    localStorage.setItem('settings', JSON.stringify(defaultSettings));
+                }
+
+                // 标记已访问
+                localStorage.setItem('hasVisited', 'true');
+            } catch (error) {
+                console.log('无法加载默认数据:', error);
+            }
+        }
+
+        // 解析CSV用于默认数据加载
+        function parseCSVForDefault(text) {
+            const lines = text.split('\n');
+            const data = {};
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const parts = line.split(',');
+                if (parts.length >= 3) {
+                    const seq = parts[0].trim();
+                    const name = parts[1].trim();
+                    const price = parseFloat(parts[2].trim());
+
+                    if (!isNaN(price) && name && name.length > 0) {
+                        data[name] = { seq, price };
+                    }
+                }
+            }
+
+            return data;
+        }
 
         // 标签页切换
         function setupTabs() {
