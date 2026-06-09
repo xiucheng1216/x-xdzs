@@ -1,0 +1,9 @@
+{
+  "markup_type": "fixed",
+  "markup_value": 5.0,
+  "tax_rate": 5.0,
+  "fixed_shipping": 12.0,
+  "free_shipping_qty": 4,
+  "order_format": "{name}{phone}\n {address}\n 序号:{seq}\n 共{quantity}包\n {price_calc}",
+  "hide_decimals": false
+}
